@@ -9,16 +9,48 @@ import Jumbotron from "react-bootstrap/Jumbotron";
 import Row from "react-bootstrap/Row";
 import ButtonToolbar from "react-bootstrap/ButtonToolbar";
 import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import Table from "react-bootstrap/Table";
 
-const hello = () => {
-    let str = 'template html';
-    fetch(projectTemplates[0].url)
-        .then(response => response.text())
-        .then((data) => {
-            console.log(data)
+const TemplateInfoModal = (props) => {
+    let infoTable = '';
+    if ('dcterms' in props.template) {
+        const infoList = props.template.dcterms.map((item, key) => {
+            return (
+                <tr key={key}>
+                    <td>{item.name}</td>
+                    <td>{item.content}</td>
+                </tr>
+            )
         });
-    let parser = new DOMParser();
-    return str;
+        infoTable =
+            <Table striped bordered hover size='sm' className='mb-0'>
+                <tbody>
+                    {infoList}
+                </tbody>
+            </Table>
+    }
+    return (
+        <Modal
+            show={props.show}
+            onHide={props.onHide}
+            size='lg'
+            centered
+        >
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    {props.template.title}
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <h5>Template info</h5>
+                {infoTable}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button onClick={props.onHide}>Close</Button>
+            </Modal.Footer>
+        </Modal>
+    );
 };
 
 class TemplateSelectBar extends React.Component {
@@ -27,10 +59,12 @@ class TemplateSelectBar extends React.Component {
         this.state = {
             templates: [],
             selectedIdx: 0,
-            selectedTemplate: {}
+            currentTemplate: {},
+            showInfo: false
         };
 
         this.selectTemplate = this.selectTemplate.bind(this);
+        this.showTemplateInfo = this.showTemplateInfo.bind(this);
     }
 
     selectTemplate = (e) => {
@@ -39,25 +73,26 @@ class TemplateSelectBar extends React.Component {
             selectedIdx: idx
         });
         if (idx !== 0) {
-            // let html = parseTemplate(idx - 1);
-            // console.log('Select template func: ' + html);
-            // this.setState({
-            //     selectedTemplate: html
-            // });
             trackPromise(
                 parseTemplate(idx - 1)
                     .then((template) => {
                         this.setState({
-                            selectedTemplate: template
+                            currentTemplate: template
                         })
                     })
             );
         } else {
             this.setState({
-                selectedTemplate: {}
+                currentTemplate: {}
             });
         }
     };
+
+    showTemplateInfo () {
+        this.setState(state => ({
+            showInfo: !state.showInfo
+        }));
+    }
 
     componentDidMount() {
         this.setState({
@@ -77,23 +112,32 @@ class TemplateSelectBar extends React.Component {
         );
 
         return (
-            <Jumbotron>
-                <h2>MRRT report rendering using React</h2>
-                <Row className='p-3'>
-                    <select onChange={this.selectTemplate} className='mr-2'>
-                        {templateList}
-                    </select>
-                    {this.state.selectedIdx !== 0 &&
-                        <ButtonToolbar>
-                            <Button variant='outline-info' className='mr-2' size='sm'><strong>i</strong></Button>
-                            <Button variant='primary' size='sm'>Fill case report</Button>
-                        </ButtonToolbar>
-                    }
-                </Row>
-                <Row>
-                    <Loader promiseTracker={usePromiseTracker} />
-                </Row>
-            </Jumbotron>
+            <React.Fragment>
+                <Jumbotron>
+                    <h2>MRRT report rendering using React</h2>
+                    <Row className='p-3'>
+                        <select onChange={this.selectTemplate} className='mr-2'>
+                            {templateList}
+                        </select>
+                        {this.state.selectedIdx !== 0 &&
+                            <ButtonToolbar>
+                                <Button id='showInfo' onClick={this.showTemplateInfo} variant='outline-info' className='mr-2' size='sm'>
+                                    <strong>i</strong>
+                                </Button>
+                                <Button variant='primary' size='sm'>Fill case report</Button>
+                            </ButtonToolbar>
+                        }
+                    </Row>
+                    <Row>
+                        <Loader promiseTracker={usePromiseTracker} />
+                    </Row>
+                </Jumbotron>
+                <TemplateInfoModal
+                    show={this.state.showInfo}
+                    onHide={this.showTemplateInfo}
+                    template={this.state.currentTemplate}
+                />
+            </React.Fragment>
         );
     }
 }
