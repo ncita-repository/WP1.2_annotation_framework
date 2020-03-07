@@ -1,6 +1,6 @@
 import React from 'react';
-import {projectTemplates} from "../util/defs";
-import {parseTemplate} from "../util/utils";
+import {projectTemplates} from "../utils/defs";
+import {parseMrrtTemplate} from "../utils/mrrt_parser";
 import {trackPromise} from "react-promise-tracker";
 import { usePromiseTracker } from 'react-promise-tracker';
 import Loader from 'react-promise-loader';
@@ -74,7 +74,7 @@ class TemplateSelectBar extends React.Component {
         });
         if (idx !== 0) {
             trackPromise(
-                parseTemplate(idx - 1)
+                parseMrrtTemplate(idx - 1)
                     .then((template) => {
                         this.setState({
                             currentTemplate: template
