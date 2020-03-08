@@ -1,4 +1,5 @@
-import {projectTemplates, MrrtTemplateAttributes, MrrtTemplate, MrrtSection} from "./defs";
+import {projectTemplates, MrrtTemplateAttributes, MrrtTemplate,
+    MrrtSection, MrrtParagraph} from "./defs";
 import {Result} from "./utils";
 
 const sleep = (milliseconds) => {
@@ -195,21 +196,20 @@ function fillTemplateBodyFromHtml(doc, template) {
             The value of the attribute shall be the string "level" followed by an integer indicating
             the nesting level (e.g.,"level1").
         - The header element may contain the title text for the section.
-        - Each section element shall contain [1..*] paragraph (p) element containing the section content.
      */
     // parse sections and their child elements
-    Array.from(doc.body.getElementsByTagName('section')).forEach((item) => {
+    Array.from(doc.body.getElementsByTagName('section')).forEach((_section) => {
         // parse immediate section elements
-        if (item.parentElement === doc.body) {
+        if (_section.parentElement === doc.body) {
             let section = new MrrtSection();
             // parse section attributes - 8.1.2 Section Attributes
-            item.getAttributeNames().forEach((attr) => {
-                section.atts[attr] = item.getAttribute(attr);
+            _section.getAttributeNames().forEach((attr) => {
+                section.atts[attr] = _section.getAttribute(attr);
             });
             // set section title
-            section.title = item.dataset.sectionName;
+            section.title = _section.dataset.sectionName;
             // parse header element
-            const header = item.getElementsByTagName('header')[0];
+            const header = _section.getElementsByTagName('header')[0];
             if (header != null) {
                 const level = header.getAttribute('class');
                 if (level != null) {
@@ -217,19 +217,26 @@ function fillTemplateBodyFromHtml(doc, template) {
                 }
             }
             // assign section code
-            //console.log(item.id);
-            if (item.id != null) {
-                section.code = findElementCode(template.templateAttributes, item.id);
+            if (_section.id != null) {
+                section.code = findElementCode(template.templateAttributes, _section.id);
             }
-
-            // parse paragraph elements
-            // item.getElementsByTagName('p').forEach((para) => {
-            //     section.atts[attr] = item.getAttribute(attr);
-            // });
             /* 8.1.3 Report Template Fields
-
+               - Each section element shall contain [1..*] paragraph (p) element containing the section content.
+               - Fields shall be described only using the HTML select or input [or textarea] elements
+                    shown in Table 8.1.3-1
+               - Table 8.1.3.1-1 shows the attributes associated with fields of any type.
              */
-
+            // parse paragraph elements
+            Array.from(_section.getElementsByTagName('p')).forEach((_paragraph) => {
+                let paragraph = new MrrtParagraph();
+                // fill paragraph attributes
+                _paragraph.getAttributeNames().forEach((attr) => {
+                    paragraph.atts[attr] = _paragraph.getAttribute(attr);
+                });
+                // fill paragraph fields
+                paragraph.fields = _paragraph.outerHTML.trim();
+                section.paragraphs.push(paragraph);
+            });
             template.sections.push(section);
         }
     });

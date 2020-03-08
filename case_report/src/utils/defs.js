@@ -33,13 +33,10 @@ export function MrrtSection() {
     this.level = 1;
     this.title = '';
     this.code = {};
-    this.prgs = []; // paragraph elements
+    this.paragraphs = []; // paragraph elements
 }
 
-// export function MrrtField() {
-//     this.atts = {};
-//     this.header = {
-//         level: null,
-//         text: ''
-//     };
-// }
+export function MrrtParagraph() {
+    this.atts = {};
+    this.fields = '';
+}

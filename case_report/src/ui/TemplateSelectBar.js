@@ -62,12 +62,11 @@ class TemplateSelectBar extends React.Component {
             currentTemplate: {},
             showInfo: false
         };
-
-        this.selectTemplate = this.selectTemplate.bind(this);
-        this.showTemplateInfo = this.showTemplateInfo.bind(this);
+        this.onSelectTemplate = this.onSelectTemplate.bind(this);
+        this.onShowTemplateInfo = this.onShowTemplateInfo.bind(this);
     }
 
-    selectTemplate = (e) => {
+    onSelectTemplate = (e) => {
         const idx = e.target.selectedIndex;
         this.setState({
             selectedIdx: idx
@@ -88,7 +87,7 @@ class TemplateSelectBar extends React.Component {
         }
     };
 
-    showTemplateInfo () {
+    onShowTemplateInfo () {
         this.setState(state => ({
             showInfo: !state.showInfo
         }));
@@ -105,8 +104,8 @@ class TemplateSelectBar extends React.Component {
         let templateList = templates.map((item) => {
             return (
                 <option key={item.id} value={item.url}>{item.name}</option>
-            )}
-        );
+            )
+        });
         templateList.unshift(
             <option key={-1} value=''>Select a template</option>
         );
@@ -116,15 +115,19 @@ class TemplateSelectBar extends React.Component {
                 <Jumbotron>
                     <h2>MRRT report rendering using React</h2>
                     <Row className='p-3'>
-                        <select onChange={this.selectTemplate} className='mr-2'>
+                        <select onChange={this.onSelectTemplate} className='mr-2'>
                             {templateList}
                         </select>
                         {this.state.selectedIdx !== 0 &&
                             <ButtonToolbar>
-                                <Button id='showInfo' onClick={this.showTemplateInfo} variant='outline-info' className='mr-2' size='sm'>
+                                <Button id='showInfo' onClick={this.onShowTemplateInfo} variant='outline-info' className='mr-2' size='sm'>
                                     <strong>i</strong>
                                 </Button>
-                                <Button variant='primary' size='sm'>Fill case report</Button>
+                                <Button id='fillReport'
+                                        onClick={() => this.props.showReportView(this.state.currentTemplate)}
+                                        variant='primary' size='sm'>
+                                    Fill case report
+                                </Button>
                             </ButtonToolbar>
                         }
                     </Row>
@@ -134,7 +137,7 @@ class TemplateSelectBar extends React.Component {
                 </Jumbotron>
                 <TemplateInfoModal
                     show={this.state.showInfo}
-                    onHide={this.showTemplateInfo}
+                    onHide={this.onShowTemplateInfo}
                     template={this.state.currentTemplate}
                 />
             </React.Fragment>

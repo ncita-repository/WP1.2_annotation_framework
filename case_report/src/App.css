@@ -3,3 +3,9 @@
   min-height: 100vh;
 }
 
+.CaseForm {
+  background-color: whitesmoke;
+}
+.CaseFormTab {
+  background-color: white;
+}
